@@ -17,6 +17,11 @@ class TupleSpace:
 
     def get(self, template: NamedTuple) -> NamedTuple:
         # pop the first item that matches the template
+
+        if template is None:
+            # return anything
+            return self._space.pop(0)
+
         for item in self._space:
             if self._match(template, item):
                 self._space.remove(item)
@@ -47,3 +52,6 @@ class TupleSpace:
     def _match(self, template: NamedTuple, item: NamedTuple) -> bool:
         # check if the template fields match the item fields
         return template._fields == item._fields
+    
+    def __len__(self):
+        return len(self._space)
