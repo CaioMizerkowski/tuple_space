@@ -1,5 +1,5 @@
-from typing import NamedTuple
 from random import shuffle
+from typing import NamedTuple
 
 
 class TupleSpace:
@@ -17,6 +17,9 @@ class TupleSpace:
 
     def get(self, template: NamedTuple) -> NamedTuple:
         # pop the first item that matches the template
+
+        if len(self) == 0:
+            return None
 
         if template is None:
             # return anything
@@ -52,6 +55,6 @@ class TupleSpace:
     def _match(self, template: NamedTuple, item: NamedTuple) -> bool:
         # check if the template fields match the item fields
         return template._fields == item._fields
-    
+
     def __len__(self):
         return len(self._space)

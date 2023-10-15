@@ -1,32 +1,42 @@
-from tuple_space.space import TupleSpace
 from random import shuffle
-from tuple_space.entities import ProducerABC, ConsumerABC, ProsumerABC, EntityABC, Eater
+
+from tuple_space.entities import (
+    Eater,
+    EntityABC,
+    GenericConsumer,
+    GenericProducer,
+    GenericProsumer,
+)
+from tuple_space.space import TupleSpace
 
 entities: list[EntityABC] = list()
+
 
 def main_loop():
     space = TupleSpace()
     eaters = 0
 
     while len(entities) > 1:
-
+        shuffle(entities)
         for entity in entities:
             entity(space)
 
-        shuffle(entities)
-
-        if len(space) > 100:
+        if len(space) > 500:
             entities.append(Eater(f"Eater {eaters}", entities))
             eaters += 1
 
 
-
 if __name__ == "__main__":
-    entities.append(ProducerABC("producer A", entities))
-    entities.append(ProducerABC("producer B", entities))
-    entities.append(ConsumerABC("consumer A", entities))
-    entities.append(ProsumerABC("prosumer A", entities))
-    entities.append(ProsumerABC("prosumer B", entities))
-    entities.append(ProsumerABC("prosumer C", entities))
-    entities.append(ProsumerABC("prosumer D", entities))
-    main_loop()
+    entities.append(GenericProducer("producer A", entities))
+    entities.append(GenericProducer("producer B", entities))
+    entities.append(GenericConsumer("consumer A", entities))
+    entities.append(GenericProsumer("prosumer A", entities))
+    entities.append(GenericProsumer("prosumer B", entities))
+    entities.append(GenericProsumer("prosumer C", entities))
+    entities.append(GenericProsumer("prosumer D", entities))
+    try:
+        main_loop()
+    except KeyboardInterrupt:
+        print("Keyboard interrupt detected, exiting...")
+    finally:
+        print(entities)
