@@ -7,8 +7,9 @@ from tuple_space.space import TupleSpace
 
 class EntityABC(ABC):
     def __init__(self, name: str, entities: list[Self]):
-        self.format: NamedTuple = None
-        self.value: self.format | None = None
+        self.in_format: NamedTuple = None
+        self.out_format: NamedTuple = None
+        self.value = None
         self.name = name
         self.entities = entities
 
@@ -16,20 +17,20 @@ class EntityABC(ABC):
     def __call__(self, space: TupleSpace):
         pass
 
-    def put(self, space: TupleSpace):
+    def _put(self, space: TupleSpace):
         space.put(self.value)
 
-    def get(self, space: TupleSpace):
-        self.value = space.get(self.format)
+    def _get(self, space: TupleSpace):
+        self.value = space.get(self.in_format)
         if self.value is None:
-            print(f"{self.name} failed to get {self.format}")
-
-    def __str__(self) -> str:
-        return self.name
+            print(f"{self.name} failed to get {self.in_format}")
 
     def _die(self):
         self.entities.remove(self)
         print(f"{self} died")
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class GenericConsumer(EntityABC):
@@ -38,7 +39,7 @@ class GenericConsumer(EntityABC):
         self.hungry = 0
 
     def __call__(self, space):
-        self.get(space)
+        self._get(space)
         if self.value:
             print(f"{self.value} consumed by {self}")
             self.hungry = 0
@@ -52,14 +53,14 @@ class GenericConsumer(EntityABC):
 class GenericProducer(EntityABC):
     def __init__(self, name: str, entities: list):
         super().__init__(name, entities)
-        self.format = NamedTuple("A", a=str, b=int)
-        self.value: self.format = self.format(a="", b=0)
+        self.out_format = NamedTuple("A", a=str, b=int)
+        self.value: self.out_format = self.out_format(a="", b=0)
         self.epochs = 0
         self.sons = 0
 
     def __call__(self, space):
-        self.value = self.format(a="a", b=1)
-        self.put(space)
+        self.value = self.out_format(a="a", b=1)
+        self._put(space)
         print(f"{self.value} produced by {self}")
         self.epochs += 1
 
@@ -74,17 +75,18 @@ class GenericProducer(EntityABC):
 class GenericProsumer(EntityABC):
     def __init__(self, name: str, entities: list):
         super().__init__(name, entities)
-        self.format = NamedTuple("B", a=str, b=int)
-        self.value: self.format = self.format(a="", b=0)
+        self.in_format = NamedTuple("B", a=str, b=int)
+        self.out_format = self.in_format
+        self.value: self.in_format = self.in_format(a="", b=0)
         self.hungry = 0
 
     def __call__(self, space):
-        self.get(space)
+        self._get(space)
 
         if self.value and self.value.b < 100:
             old_value = self.value
             self.value = self.value._replace(a="b", b=self.value.b + 1)
-            self.put(space)
+            self._put(space)
             print(f"{old_value} transformed by {self} in {self.value}")
             self.hungry = 0
             return
@@ -96,7 +98,7 @@ class GenericProsumer(EntityABC):
 
 class Eater(GenericConsumer):
     def __call__(self, space):
-        self.get(space)
+        self._get(space)
         print(f"{self.value} consumed by {self}")
         try:
             entity = self.entities.pop(0)

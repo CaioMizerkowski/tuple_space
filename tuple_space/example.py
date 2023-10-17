@@ -1,6 +1,6 @@
 from random import shuffle
 
-from tuple_space.entities import (
+from tuple_space.generic_entities import (
     Eater,
     EntityABC,
     GenericConsumer,
